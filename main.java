@@ -1,0 +1,7 @@
+package OnlineChess;
+
+public class main {
+    public static void main(String args[]) {
+    }
+}
+
