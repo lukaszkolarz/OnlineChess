@@ -1,51 +1,45 @@
 package OnlineChess;
 import OnlineChess.pieces.Piece;
-
 import java.lang.*;
+
 //Composite design pattern used
 //Small classes and convenient grouping easy to maintain and read
-public abstract class Field {
-    protected final int x;
-    protected final int y;
-    Field(int row,int col)
+public final class Field {
+    private final int x;
+    private final int y;
+    private boolean occupied;
+    private Piece piece;
+    public Field(int row,int col)
     {
         this.x=row;
         this.y=col;
+        this.occupied=false;
+        this.piece=null;
     }
-    public abstract boolean isFieldOccupied();
-    public abstract Piece getPiece();
-    public static final class EmptyField extends Field {
-        public EmptyField(int row, int col) {
-            super(row, col);
-        }
-
-        @Override
-        public boolean isFieldOccupied() {
-            return false;
-        }
-
-        @Override
-        public Piece getPiece() {
+    public Field(int row,int col,Piece piece)
+    {
+        this.x=row;
+        this.y=col;
+        this.occupied=true;
+        this.piece=piece;
+    }
+    public boolean isFieldOccupied()
+    {
+        return this.occupied;
+    }
+    public Piece getPiece()
+    {
+        if(piece!=null)
+             return this.piece;
+        else
             return null;
-        }
     }
-    public static final class OccupiedField extends Field {
-           private Piece pieceOnField;
-           public OccupiedField(int row,int col,Piece onField)
-           {
-               super(row,col);
-               this.pieceOnField=onField;
-           }
-           @Override
-           public boolean isFieldOccupied()
-           {
-               return true;
-           }
-           @Override
-           public Piece getPiece()
-           {
-               return this.pieceOnField;
-           }
-
+    public int getX()
+    {
+        return x;
+    }
+    public int getY()
+    {
+        return y;
     }
 }
