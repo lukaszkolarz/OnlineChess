@@ -3,6 +3,7 @@ package client;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import javax.swing.*;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -16,7 +17,7 @@ public class ClientServerSocket {
     private static final Logger logger = LogManager.getLogger("clientNetwork");
     private Socket client;
     private ServerSocket server;
-    private PrintWriter out;
+    private BufferedWriter out;
     private BufferedReader in;
     int port;
 
@@ -53,7 +54,7 @@ public class ClientServerSocket {
     public void initSocket(){
         try {
             in = new BufferedReader((new InputStreamReader(client.getInputStream())));
-            out = new PrintWriter(client.getOutputStream(), true);
+            out = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
             logger.debug("Initializing writing and reading buffer");
         } catch (IOException e) {
             logger.fatal("Read failed!");
@@ -81,8 +82,17 @@ public class ClientServerSocket {
      * @param line will be put to sending buffer
      */
     public void sendString(String line){
-        logger.debug("Sending string to peer");
-        out.println(line);
+        try {
+            logger.debug("Sending string to peer");
+            out.write(line);
+            out.newLine();
+            out.flush();
+        } catch (IOException e){
+            JOptionPane.showMessageDialog(null, "Opponent is no longer available",
+                    "ERROR - no connection", JOptionPane.ERROR_MESSAGE);
+            logger.fatal("Server no longer available");
+            System.exit(-1);
+        }
     }
 
     /**
@@ -99,5 +109,17 @@ public class ClientServerSocket {
      */
     public ObjectInputStream getObjectIn() throws IOException {
         return new ObjectInputStream(client.getInputStream());
+    }
+
+    public void closeSocket() {
+        try {
+            client.close();
+            in.close();
+            out.close();
+            logger.info("Client-server socket closed");
+        } catch (IOException e){
+            logger.error("Client-server socket cannot be closed");
+        }
+
     }
 }

@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.UnknownHostException;
 
 /**
  * The Client is a class to managing connection with server ant choosing perr to connect with.
@@ -184,6 +185,11 @@ public class Client implements ActionListener {
                     "WARNING", JOptionPane.WARNING_MESSAGE);
             list.clearSelection();
             updateHostNames();
+        } else if (message.equals("not available")){
+            JOptionPane.showMessageDialog(null, "Host is no longer available",
+                    "ERROR", JOptionPane.ERROR_MESSAGE);
+            list.clearSelection();
+            updateHostNames();
         }
     }
 
@@ -200,12 +206,28 @@ public class Client implements ActionListener {
                         "WARNING", JOptionPane.WARNING_MESSAGE);
             } else {
                 serverAddress = serverAddressInput.getText().replaceAll(" ", "");
-                serverPort = Integer.parseInt(serverPortInput.getText().replaceAll(" ", ""));
+                try {
+                    serverPort = Integer.parseInt(serverPortInput.getText().replaceAll(" ", ""));
+                } catch (NumberFormatException numberFormatException) {
+                    logger.error("Port number NaN");
+                    JOptionPane.showMessageDialog(null, "Port number requires a natural number value",
+                            "NaN", JOptionPane.ERROR_MESSAGE);
+                    serverPortInput.setText("");
+                    return;
+                }
 
                 client = new CliSocket(serverAddress, serverPort);
-                client.newClientSocket();
-                connectionWindow.setVisible(false);
-                insertName();
+                try {
+                    client.newClientSocket();
+                    connectionWindow.setVisible(false);
+                    insertName();
+                } catch (IOException ioException) {
+                    logger.error("No server available on: " + serverAddress + ":" + serverPort);
+                    JOptionPane.showMessageDialog(null, "No server available on this ip",
+                            "NO SERVER", JOptionPane.ERROR_MESSAGE);
+                serverAddressInput.setText("");
+                serverPortInput.setText("");
+                }
             }
         }
         else if (e.getSource() == insertNameButton){
@@ -261,6 +283,7 @@ public class Client implements ActionListener {
     public synchronized void initSocket(){
         client.sendString("end");
         client.closeSocket();
+        logger.info("Connection with server is closed");
 
         if (clientClientSocket == null){
             clientServerSocket.initSocket();
@@ -270,7 +293,13 @@ public class Client implements ActionListener {
             send("connected with peer");
             logger.info("First received message: " + receiveString());
         } else if (clientServerSocket == null){
-            clientClientSocket.newClientSocket();
+            try {
+                clientClientSocket.newClientSocket();
+            }
+            catch (IOException e){
+                logger.fatal("Cannot create client socket");
+                System.exit(-1);
+            }
             isServer = false;
             isReady = false;
             notify();
@@ -493,5 +522,25 @@ public class Client implements ActionListener {
                 logger.error("Error in waiting", e);
             }
         }
+    }
+
+    public void closePeerSocket(){
+        if (clientClientSocket == null){
+            try {
+                clientServerSocket.closeSocket();
+                logger.info("Client-client connection is closed");
+            } catch (NullPointerException e) {
+                logger.error("No socket to close");
+            }
+        } else if (clientServerSocket == null){
+            try {
+                clientClientSocket.closeSocket();
+                logger.info("Client-client connection is closed");
+            }
+            catch (NullPointerException e){
+                logger.error("No socket to close");
+            }
+        }
+        System.exit(0);
     }
 }
