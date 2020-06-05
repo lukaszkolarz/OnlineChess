@@ -68,6 +68,7 @@ public class ListeningClient extends Thread{
         try{
             line = in.readLine();
         } catch (IOException e){
+            this.interrupt();
             logger.error("Read failed or closing socket");
         }
         return line;

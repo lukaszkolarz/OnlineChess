@@ -19,21 +19,36 @@
             </PatternLayout>
         </File>
 
+        <File name="Game" fileName="Game.log">
+            <PatternLayout>
+                <Pattern> %d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n </Pattern>
+            </PatternLayout>
+        </File>
+
         <Async name="ClientNetworkAsync">
             <AppenderRef ref="ClientNetwork"/>
         </Async>
+
         <Async name="ServerAsync">
             <AppenderRef ref="Server"/>
+        </Async>
+
+        <Async name="GameAsync">
+            <AppenderRef ref="Game"/>
         </Async>
     </Appenders>
 
     <Loggers>
-        <Logger name="clientNetwork" additivity="false" level="info">
+        <Logger name="clientNetwork" additivity="false" level="debug">
             <AppenderRef ref="ClientNetworkAsync" />
         </Logger>
 
         <Logger name="server" additivity="false" level="info">
             <AppenderRef ref="ServerAsync" />
+        </Logger>
+
+        <Logger name="game" additivity="false" level="debug">
+            <AppenderRef ref="GameAsync" />
         </Logger>
 
         <Root level="debug">

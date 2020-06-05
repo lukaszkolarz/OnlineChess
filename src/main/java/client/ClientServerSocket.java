@@ -12,13 +12,10 @@ import java.net.Socket;
  * The ServerSocket implement server socket in ONE of two hosts which
  * want to connect i p2p way.
  */
-public class ClientServerSocket {
+public class ClientServerSocket extends PeerSocket {
 
     private static final Logger logger = LogManager.getLogger("clientNetwork");
-    private Socket client;
     private ServerSocket server;
-    private BufferedWriter out;
-    private BufferedReader in;
     int port;
 
     /**
@@ -30,7 +27,7 @@ public class ClientServerSocket {
         try {
             server = new ServerSocket(this.port);
             server.setReuseAddress(true);
-            logger.info("Creating new CLient-Server socket");
+            logger.info("Creating new Client-Server socket");
         } catch (IOException e) {
             logger.error("Cannot listen on port: " + port);
         }

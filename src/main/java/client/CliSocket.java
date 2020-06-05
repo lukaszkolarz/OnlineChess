@@ -12,11 +12,8 @@ import java.net.UnknownHostException;
  * The CLiSocket class creates a  client  to get another host from server and create
  * socket to be used in p2p communication
  */
-public class CliSocket {
+public class CliSocket extends PeerSocket {
     private final static Logger logger = LogManager.getLogger("clientNetwork");
-    private Socket clientSocket;
-    private BufferedReader in;
-    private BufferedWriter out;
     private final int srvPort;
     private final String srvIP;
 
@@ -34,10 +31,10 @@ public class CliSocket {
      * creates socket
      */
     public void newClientSocket() throws IOException {
-        clientSocket = new Socket(srvIP, srvPort);
-        clientSocket.setReuseAddress(true);
-        out = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
-        in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        client = new Socket(srvIP, srvPort);
+        client.setReuseAddress(true);
+        out = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
+        in = new BufferedReader(new InputStreamReader(client.getInputStream()));
         logger.info("Associating new connection with server");
     }
 
@@ -84,7 +81,7 @@ public class CliSocket {
      * @throws IOException - if an I/O error occurs when creating the output stream or if the socket is not connected
      */
     public ObjectOutputStream getObjectOut() throws IOException {
-        return new ObjectOutputStream(clientSocket.getOutputStream());
+        return new ObjectOutputStream(client.getOutputStream());
     }
 
     /**
@@ -92,12 +89,12 @@ public class CliSocket {
      * @throws IOException - if an I/O error occurs when creating the output stream or if the socket is not connected
      */
     public ObjectInputStream getObjectIn() throws IOException {
-        return new ObjectInputStream(clientSocket.getInputStream());
+        return new ObjectInputStream(client.getInputStream());
     }
 
     public void closeSocket() {
         try {
-            clientSocket.close();
+            client.close();
             in.close();
             out.close();
             logger.info("Client-client socket closed");
