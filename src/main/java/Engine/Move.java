@@ -25,10 +25,6 @@ public class Move {
         this.NextLocation_x=candidate.getX();
         this.NextLocation_y=candidate.getY();
     }
-    /*public Pair<Integer,Integer> GetNextLocation()
-    {
-        return new Pair<Integer,Integer>(NextLocation_x,NextLocation_y);
-    }*/
     public boolean equals(Move moveToMake)
     {
         if(this.NextLocation_x==moveToMake.getNextX() && this.NextLocation_y==moveToMake.getNextY() && this.movePiece==moveToMake.getPiece())

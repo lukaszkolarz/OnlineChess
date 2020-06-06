@@ -3,10 +3,7 @@ package server;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -19,7 +16,7 @@ public class SrvThread implements Runnable {
     private static Logger logger;
     private final Socket client;
     private BufferedReader in;
-    private PrintWriter out;
+    private BufferedWriter out;
     private String name;
     private final ServerSingleton communicator;
     private SrvThread opponent = null;
@@ -42,34 +39,42 @@ public class SrvThread implements Runnable {
      * override function to start thread
      */
     public void run() {
-        logger.info("New server thread started");
+        logger.debug("New server thread started");
         streamInit();
         name = read();
+        logger.info("Received username");
         communicator.addNewThread(this, name);
         String message;
 
         while (true) {
             message = read();
-            if (message.equals("refresh")) {
-                sendAllNames();
-            } else if (message.equals("connect")) {
-                sendInvitation();
-            } else if (message.equals("accept")) {
-                accept();
-            } else if (message.equals("refuse")) {
-                refuse();
-            } else if (message.equals("end")) {
+            try {
+                if (message.equals("refresh")) {
+                    sendAllNames();
+                } else if (message.equals("connect")) {
+                    sendInvitation();
+                } else if (message.equals("accept")) {
+                    accept();
+                } else if (message.equals("refuse")) {
+                    refuse();
+                } else if (message.equals("end")) {
+                    break;
+                } else {
+                    logger.error("Invalid input.");
+                }
+            } catch (NullPointerException e) {
+                logger.fatal("Client is unavailable. Closing connection.");
+                communicator.removeByName(this.name);
                 break;
-            } else {
-                logger.error("Invalid input");
             }
         }
         try {
             client.close();
             in.close();
             out.close();
-            logger.info("Connection closed. Closing thread");
+            logger.info("Connection closed.");
             Thread.currentThread().interrupt();
+            logger.info("Thread closed.");
         } catch (IOException e) {
             logger.error("Cannot close connection");
         }
@@ -80,12 +85,17 @@ public class SrvThread implements Runnable {
      */
     private synchronized void sendInvitation(){
         String opponentName = read();
-        if ((this.opponent = communicator.getThreadByName(opponentName)) != null){
-            this.opponent.setOpponent(this);
-            this.opponent.send("new connection");
-            this.opponent.send(this.name);
-            logger.info("Invitation send");
+        try {
+            if ((this.opponent = communicator.getThreadByName(opponentName)) != null) {
+                this.opponent.setOpponent(this);
+                this.opponent.send("new connection");
+                this.opponent.send(this.name);
+                logger.info("Invitation send");
             }
+        } catch (java.lang.IndexOutOfBoundsException e) {
+            this.send("not available");
+            logger.error("Cannot reach. Host is unavailable");
+        }
         }
 
     /**
@@ -112,9 +122,9 @@ public class SrvThread implements Runnable {
     public void streamInit(){
         try{
             this.in = new BufferedReader((new InputStreamReader(client.getInputStream())));
-            this.out = new PrintWriter(client.getOutputStream(), true);
+            this.out = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
         } catch (IOException e) {
-            logger.fatal("Read failed!", e);
+            logger.fatal("Init streams failed", e);
             System.exit(-1);
         }
     }
@@ -127,6 +137,7 @@ public class SrvThread implements Runnable {
         String line = null;
         try{
             line = in.readLine();
+            logger.debug("Received String.");
         } catch (IOException e){
             logger.error("Read failed");
         }
@@ -138,7 +149,25 @@ public class SrvThread implements Runnable {
      * @param line String which will be send
      */
     public void send(String line){
-        out.println(line);
+        try {
+            out.write(line);
+            out.newLine();
+            out.flush();
+        } catch(IOException e) {
+            logger.fatal("Cannot reach client");
+            communicator.removeByName(name);
+            try {
+                client.close();
+                in.close();
+                out.close();
+                logger.info("Connection closed");
+                Thread.currentThread().interrupt();
+                logger.info("Thread closed");
+            } catch (IOException io) {
+                logger.fatal("Cannot close broken pipe. Turning off server.");
+                System.exit(-1);
+            }
+        }
     }
 
     /**

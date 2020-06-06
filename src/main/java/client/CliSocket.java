@@ -3,6 +3,7 @@ package client;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import javax.swing.*;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -11,11 +12,8 @@ import java.net.UnknownHostException;
  * The CLiSocket class creates a  client  to get another host from server and create
  * socket to be used in p2p communication
  */
-public class CliSocket {
+public class CliSocket extends PeerSocket {
     private final static Logger logger = LogManager.getLogger("clientNetwork");
-    private Socket clientSocket;
-    private BufferedReader in;
-    private PrintWriter out;
     private final int srvPort;
     private final String srvIP;
 
@@ -32,19 +30,12 @@ public class CliSocket {
     /**
      * creates socket
      */
-    public void newClientSocket(){
-        try {
-            clientSocket = new Socket(srvIP, srvPort);
-            clientSocket.setReuseAddress(true);
-            out = new PrintWriter(clientSocket.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            logger.info("Associating new connection with server");
-        }catch (UnknownHostException e) {
-            logger.error("Unknown host: " + srvIP);
-        }catch (IOException e) {
-            logger.fatal("No I/O");
-            System.exit(1);
-        }
+    public void newClientSocket() throws IOException {
+        client = new Socket(srvIP, srvPort);
+        client.setReuseAddress(true);
+        out = new BufferedWriter(new OutputStreamWriter(client.getOutputStream()));
+        in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+        logger.info("Associating new connection with server");
     }
 
     /**
@@ -66,9 +57,18 @@ public class CliSocket {
      * puts String to sending buffer
      * @param message will be put to sending buffer
      */
-    public void sendString(String message){
-        logger.debug("Sending string");
-        out.println(message);
+    public void sendString(String message) {
+        try{
+            logger.debug("Sending string");
+            out.write(message);
+            out.newLine();
+            out.flush();
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(null, "Server is no longer available",
+                    "ERROR - no connection", JOptionPane.ERROR_MESSAGE);
+            logger.fatal("Server no longer available");
+            System.exit(-1);
+        }
     }
 
     /**
@@ -81,7 +81,7 @@ public class CliSocket {
      * @throws IOException - if an I/O error occurs when creating the output stream or if the socket is not connected
      */
     public ObjectOutputStream getObjectOut() throws IOException {
-        return new ObjectOutputStream(clientSocket.getOutputStream());
+        return new ObjectOutputStream(client.getOutputStream());
     }
 
     /**
@@ -89,17 +89,17 @@ public class CliSocket {
      * @throws IOException - if an I/O error occurs when creating the output stream or if the socket is not connected
      */
     public ObjectInputStream getObjectIn() throws IOException {
-        return new ObjectInputStream(clientSocket.getInputStream());
+        return new ObjectInputStream(client.getInputStream());
     }
 
     public void closeSocket() {
         try {
-            clientSocket.close();
+            client.close();
             in.close();
             out.close();
-            logger.info("Client connection closed");
+            logger.info("Client-client socket closed");
         } catch (IOException e){
-            logger.error("Cannot close connection");
+            logger.error("Client-client socket cannot be closed");
         }
 
     }

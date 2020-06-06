@@ -26,6 +26,7 @@ public class King extends Piece{
         List<Move> PossibleMoves=new ArrayList<Move>();
         for(int row=0;row<8;row++) {
             if (MoveIsLegal(moves[row][0], moves[row][1])) {
+                //Pobierac piony przeciwnika i sprawdzac czy ktorykolwiek moze wejsc na dane pole
 
                 final Field candidate = game_board.getField(this.piecePosition_x + moves[row][0], this.piecePosition_y + moves[row][1]);
                 if (!candidate.isFieldOccupied()) {

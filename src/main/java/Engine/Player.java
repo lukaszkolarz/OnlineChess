@@ -46,6 +46,8 @@ public abstract class Player {
         isFirst=false;
     }
 
+    public boolean getToken()
+    { return this.yourTurn ;}
     public abstract void updatePieces();
 
 }

@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.io.Serializable;
 
+
 /**
  * The Client is a class to managing connection with server ant choosing perr to connect with.
  * Client manage also connection p2p.
@@ -184,6 +185,11 @@ public class Client implements ActionListener {
                     "WARNING", JOptionPane.WARNING_MESSAGE);
             list.clearSelection();
             updateHostNames();
+        } else if (message.equals("not available")){
+            JOptionPane.showMessageDialog(null, "Host is no longer available",
+                    "ERROR", JOptionPane.ERROR_MESSAGE);
+            list.clearSelection();
+            updateHostNames();
         }
     }
 
@@ -200,12 +206,28 @@ public class Client implements ActionListener {
                         "WARNING", JOptionPane.WARNING_MESSAGE);
             } else {
                 serverAddress = serverAddressInput.getText().replaceAll(" ", "");
-                serverPort = Integer.parseInt(serverPortInput.getText().replaceAll(" ", ""));
+                try {
+                    serverPort = Integer.parseInt(serverPortInput.getText().replaceAll(" ", ""));
+                } catch (NumberFormatException numberFormatException) {
+                    logger.error("Port number NaN");
+                    JOptionPane.showMessageDialog(null, "Port number requires a natural number value",
+                            "NaN", JOptionPane.ERROR_MESSAGE);
+                    serverPortInput.setText("");
+                    return;
+                }
 
                 client = new CliSocket(serverAddress, serverPort);
-                client.newClientSocket();
-                connectionWindow.setVisible(false);
-                insertName();
+                try {
+                    client.newClientSocket();
+                    connectionWindow.setVisible(false);
+                    insertName();
+                } catch (IOException ioException) {
+                    logger.error("No server available on: " + serverAddress + ":" + serverPort);
+                    JOptionPane.showMessageDialog(null, "No server available on this ip",
+                            "NO SERVER", JOptionPane.ERROR_MESSAGE);
+                serverAddressInput.setText("");
+                serverPortInput.setText("");
+                }
             }
         }
         else if (e.getSource() == insertNameButton){
@@ -261,6 +283,7 @@ public class Client implements ActionListener {
     public synchronized void initSocket(){
         client.sendString("end");
         client.closeSocket();
+        logger.info("Connection with server is closed");
 
         if (clientClientSocket == null){
             clientServerSocket.initSocket();
@@ -270,7 +293,13 @@ public class Client implements ActionListener {
             send("connected with peer");
             logger.info("First received message: " + receiveString());
         } else if (clientServerSocket == null){
-            clientClientSocket.newClientSocket();
+            try {
+                clientClientSocket.newClientSocket();
+            }
+            catch (IOException e){
+                logger.fatal("Cannot create client socket");
+                System.exit(-1);
+            }
             isServer = false;
             isReady = false;
             notify();
@@ -283,6 +312,7 @@ public class Client implements ActionListener {
             logger.fatal("Cannot connect with peer");
             System.exit(-1);
         }
+        logger.debug("Is server: " + isServer);
     }
 
     /**
@@ -295,90 +325,6 @@ public class Client implements ActionListener {
             clientServerSocket.sendString(data);
         }else{
             clientClientSocket.sendString(data);
-        }
-    }
-
-    /**
-     * sends Integer to peer
-     * @param data Integer which will be write
-     */
-    public void send(Integer data){
-        waiting();
-        if (isServer){
-            clientServerSocket.sendString(String.valueOf(data));
-        }else{
-            clientClientSocket.sendString(String.valueOf(data));
-        }
-    }
-
-    /**
-     * sends Character to peer
-     * @param data Character which will be write
-     */
-    public void send(Character data){
-        waiting();
-        if (isServer){
-            clientServerSocket.sendString(Character.toString(data));
-        }else{
-            clientClientSocket.sendString(Character.toString(data));
-        }
-    }
-
-    /**
-     * sends Long to peer
-     * @param data Long which will be write
-     */
-    public void send(Long data){
-        waiting();
-        if (isServer){
-            clientServerSocket.sendString(String.valueOf(data));
-        }else{
-            clientClientSocket.sendString(String.valueOf(data));
-        }
-    }
-
-    /**
-     * sends Float to peer
-     * @param data Float which will be write
-     */
-    public void send(Float data) {
-        waiting();
-        if (isServer) {
-            clientServerSocket.sendString(String.valueOf(data));
-        } else {
-            clientClientSocket.sendString(String.valueOf(data));
-        }
-    }
-
-    /**
-     * sends Double to peer
-     * @param data Double which will be write
-     */
-    public void send(Double data) {
-        waiting();
-        if (isServer) {
-            clientServerSocket.sendString(String.valueOf(data));
-        } else {
-            clientClientSocket.sendString(String.valueOf(data));
-        }
-    }
-
-    /**
-     * sends objects which implements Serializable
-     * @param object must implement Serializable
-     */
-    public void send(Serializable object){
-        waiting();
-        try{
-            logger.debug("Sending serializable data");
-            if (isServer) {
-                clientServerSocket.getObjectOut().writeObject(object);
-            } else {
-                clientClientSocket.getObjectOut().writeObject(object);
-            }
-        } catch (IOException e) {
-            logger.error("Cannot send serializable data");
-
         }
     }
 
@@ -396,93 +342,6 @@ public class Client implements ActionListener {
     }
 
     /**
-     * receiving Integer from peer
-     * @return received Integer
-     */
-    public Integer receiveInteger(){
-        waiting();
-        if (isServer){
-            return Integer.parseInt(clientServerSocket.receiveString());
-        }else{
-            return Integer.parseInt(clientClientSocket.receiveString());
-        }
-    }
-
-    /**
-     * receiving Character from peer
-     * @return received Character
-     */
-    public Character receiveCharacter(){
-        waiting();
-        if (isServer){
-            return clientServerSocket.receiveString().charAt(0);
-        }else{
-            return clientClientSocket.receiveString().charAt(0);
-        }
-    }
-
-    /**
-     * receiving Long from peer
-     * @return received Long
-     */
-    public Long receiveLong(){
-        waiting();
-        if (isServer){
-            return Long.parseLong(clientServerSocket.receiveString());
-        }else{
-            return Long.parseLong(clientClientSocket.receiveString());
-        }
-    }
-
-    /**
-     * receiving Float from peer
-     * @return received Float
-     */
-    public Float receiveFloat(){
-        waiting();
-        if (isServer){
-            return Float.parseFloat(clientServerSocket.receiveString());
-        }else{
-            return Float.parseFloat(clientClientSocket.receiveString());
-        }
-    }
-
-    /**
-     * receiving Double from peer
-     * @return received Double
-     */
-    public Double receiveDouble(){
-        waiting();
-        if (isServer){
-            return Double.parseDouble(clientServerSocket.receiveString());
-        }else{
-            return Double.parseDouble(clientClientSocket.receiveString());
-        }
-    }
-
-    /**
-     * sends objects which implement Serializable via socket
-     * @return received object
-     */
-    public Serializable receiveObject(){
-        waiting();
-        try {
-            logger.debug("Receiving serializable data");
-            if (isServer) {
-                return (Serializable) clientServerSocket.getObjectIn().readObject();
-            } else {
-                return (Serializable) clientClientSocket.getObjectIn().readObject();
-            }
-        } catch (IOException e) {
-            logger.error("Cannot receive serializable data", e);
-            return null;
-        } catch (ClassNotFoundException e) {
-            logger.error("Invalid class", e);
-            return null;
-        }
-    }
-
-    /**
      * lets receiveFromHost and sendToHost wait for initialize p2p connection
      */
     private synchronized void waiting() {
@@ -493,5 +352,37 @@ public class Client implements ActionListener {
                 logger.error("Error in waiting", e);
             }
         }
+    }
+
+    public void closePeerSocket(){
+        if (clientClientSocket == null){
+            try {
+                clientServerSocket.closeSocket();
+                logger.info("Client-client connection is closed");
+            } catch (NullPointerException e) {
+                logger.error("No socket to close");
+            }
+        } else if (clientServerSocket == null){
+            try {
+                clientClientSocket.closeSocket();
+                logger.info("Client-client connection is closed");
+            }
+            catch (NullPointerException e){
+                logger.error("No socket to close");
+            }
+        }
+        System.exit(0);
+    }
+
+    public boolean getIsServer(){
+        return isServer;
+    }
+
+
+    /**
+     * Additional object send functions
+     */
+    public void processData(Object message) throws IOException{
+
     }
 }

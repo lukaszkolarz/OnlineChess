@@ -1,5 +1,7 @@
 package Engine.GUI;
 
+import client.Client;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -33,6 +35,14 @@ public class BoardGUI extends JFrame {
         }
         return instance;
     }
+    public void setSocket(Client GameSocket)
+    {
+        chess_board.setSock(GameSocket);
+    }
+    public void setFrameName(String title)
+    {
+        this.setTitle("Chess "+title);
+    }
     private JMenuBar addMenuBar()
     {
         JMenuBar Menu=new JMenuBar();
@@ -51,5 +61,9 @@ public class BoardGUI extends JFrame {
         });
         fileMenu.add(exitGameItem);
         return fileMenu;
+    }
+    public BoardPanel getBoardPanel()
+    {
+        return chess_board;
     }
 }

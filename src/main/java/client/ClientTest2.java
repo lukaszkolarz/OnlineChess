@@ -8,5 +8,6 @@ public class ClientTest2 {
 
         Client client = new Client();
         System.out.println(client.receiveString());
+        client.closePeerSocket();
     }
 }
