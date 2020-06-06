@@ -1,5 +1,6 @@
 package Game;
 
+import Engine.GUI.BoardGUI;
 import client.Client;
 import client.ClientServerSocket;
 import client.PeerSocket;
@@ -16,10 +17,13 @@ public class Player implements ActionListener {
     private String color;
     private JButton black, white;
     private JFrame colorWindow;
+    private BoardGUI gameinstance;
 
     public Player(Client gameSocket){
         this.gameSocket = gameSocket;
         chooseColor();
+        this.gameinstance=BoardGUI.getInstance();
+
     }
 
     private void chooseColor(){
@@ -65,6 +69,7 @@ public class Player implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == white){
             this.color = "White";
+
             gameSocket.send("Black");
             logger.debug("Chosen color " + color);
             colorWindow.setVisible(false);
