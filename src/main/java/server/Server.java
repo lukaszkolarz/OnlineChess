@@ -4,9 +4,8 @@ import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.UnknownHostException;
+import java.net.*;
+import java.util.Enumeration;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -19,7 +18,6 @@ public class Server extends Thread implements ActionListener {
     private static final Logger logger = LogManager.getLogger("server");
     private ServerSocket server;
     private int port;
-    private String ip;
     private JFrame window;
     private JButton button, endButton, startButton;
     private JTextField portField;
@@ -32,10 +30,22 @@ public class Server extends Thread implements ActionListener {
     public Server(){
         try{
             insertServerPort();
-            local = InetAddress.getLocalHost();
-            ip = local.getHostAddress();
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while(interfaces.hasMoreElements()){
+                NetworkInterface iface = interfaces.nextElement();
+                Enumeration<InetAddress> addresses = iface.getInetAddresses();
+
+                while(addresses.hasMoreElements()){
+                    InetAddress address = addresses.nextElement();
+                    if(address instanceof Inet4Address && !address.isLoopbackAddress()){
+                        local = address;
+                    }
+                }
+            }
+            String ip = local.getHostAddress();
             logger.info("Got server ip: " + ip + ":" + port);
-        } catch (UnknownHostException e) {
+
+        } catch (SocketException e) {
             logger.fatal("Cannot get host address", e);
             System.exit(-1);
         }
@@ -142,6 +152,7 @@ public class Server extends Thread implements ActionListener {
         info.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         info.setLocationRelativeTo(null);
         info.setVisible(true);
+
     }
 
     /**
@@ -153,7 +164,7 @@ public class Server extends Thread implements ActionListener {
             startButtonAction();
 
         }else if (e.getSource() == startButton){
-            startServerButtonAction();
+            //startServerButtonAction();
 
         } else if (e.getSource() == endButton){
             endButtonAction();
@@ -183,6 +194,7 @@ public class Server extends Thread implements ActionListener {
                 logger.error("Port number is NaN");
             }
         }
+        this.start();
     }
 
     public void startServerButtonAction() {
