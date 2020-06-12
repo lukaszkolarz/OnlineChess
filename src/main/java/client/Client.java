@@ -377,12 +377,4 @@ public class Client implements ActionListener {
     public boolean getIsServer(){
         return isServer;
     }
-
-
-    /**
-     * Additional object send functions
-     */
-    public void processData(Object message) throws IOException{
-
-    }
 }
