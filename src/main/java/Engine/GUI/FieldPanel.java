@@ -61,7 +61,7 @@ public class FieldPanel extends JPanel {
         if(game_board.getField(this.FieldX-1,this.FieldY-1).isFieldOccupied())
         {
             StringBuilder path=new StringBuilder();
-            path.append("D:\\Java\\OnlineChess\\src\\GUI\\PiecesImage\\")
+            path.append("src/main/java/Engine/GUI/PiecesImage/")
                     .append(game_board.getField(this.FieldX-1,this.FieldY-1).getPiece().getPieceAlliance())
                     .append(game_board.getField(this.FieldX-1,this.FieldY-1).getPiece().toStringPieceType())
                     .append(".png");
