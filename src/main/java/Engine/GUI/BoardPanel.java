@@ -2,7 +2,10 @@ package Engine.GUI;
 
 import Engine.*;
 import Engine.pieces.Piece;
+import client.CliSocket;
 import client.Client;
+import client.ClientServerSocket;
+import client.PeerSocket;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,13 +17,14 @@ import java.util.List;
 public class BoardPanel extends JPanel implements MouseListener {
     private List<FieldPanel> boardFields;
     private Game game_board;
-    private Client NetworkPlayer;
+    private PeerSocket NetworkPlayer;
     private Player LocalPlayer;
     private Player MovingPlayer;
     private Field sourceField;
     private Field destinationField;
     private Piece toMovePiece;
     private List<Move> moves;
+
     public BoardPanel()
     {
         super(new GridLayout(8,8));
@@ -37,8 +41,8 @@ public class BoardPanel extends JPanel implements MouseListener {
         }
         this.addMouseListener(this);
         MovingPlayer=game_board.getWhitePlayer();
-
     }
+
     private void redrawBoard(Board chessBoard) {
         removeAll();
         for(FieldPanel fieldPan:boardFields)
@@ -53,9 +57,14 @@ public class BoardPanel extends JPanel implements MouseListener {
     {
         return this.game_board;
     }
-    public void setSock(Client GameSocket)
+    public void setSock(CliSocket gameSocket)
     {
-        this.NetworkPlayer=GameSocket;
+        this.NetworkPlayer=gameSocket;
+    }
+
+    public void setSock(ClientServerSocket gameSocket)
+    {
+        this.NetworkPlayer=gameSocket;
     }
 
     public void setLocalPlayer(Player local)
@@ -65,18 +74,13 @@ public class BoardPanel extends JPanel implements MouseListener {
 
     @Override
     public void mouseClicked(MouseEvent mouseEvent) {
-        //Get Coordinates
 
-        //First click sourceField==null
-        if((MovingPlayer instanceof WhitePlayer && LocalPlayer instanceof BlackPlayer)||(MovingPlayer instanceof BlackPlayer && LocalPlayer instanceof WhitePlayer)) {
-            ReceiveMessage();
-            MovingPlayer=MovingPlayer.getOpponent();
-        }
-        else
-        {
-            int coordinateX=mouseEvent.getY()/75;
-            int coordinateY=mouseEvent.getX()/75;
-            System.out.println(coordinateX+" "+coordinateY);
+        if (checkInstance()) {
+            return;
+        } else {
+            int coordinateX = mouseEvent.getY() / 75;
+            int coordinateY = mouseEvent.getX() / 75;
+            System.out.println(coordinateX + " " + coordinateY);
             if (sourceField == null) {
                 //Check if it's first move
                 if (game_board.getWhitePlayer().isItFirstMove() && LocalPlayer instanceof WhitePlayer) {
@@ -137,9 +141,9 @@ public class BoardPanel extends JPanel implements MouseListener {
             //Second click
             //If we already set sourceField and piece to move
             else {
-                coordinateX=mouseEvent.getY()/75;
-                coordinateY=mouseEvent.getX()/75;
-                System.out.println(coordinateX+" "+coordinateY);
+                coordinateX = mouseEvent.getY() / 75;
+                coordinateY = mouseEvent.getX() / 75;
+                System.out.println(coordinateX + " " + coordinateY);
                 //If we clicked on same field as in the first click just reset board
                 if (sourceField.getX() == coordinateX && sourceField.getY() == coordinateY) {
                     SwingUtilities.invokeLater(new Runnable() {
@@ -177,18 +181,19 @@ public class BoardPanel extends JPanel implements MouseListener {
                                 }
 
                             });
-                            StringBuilder s=new StringBuilder();
+                            StringBuilder s = new StringBuilder();
                             s.append("x").append(sourceField.getX()).append("y").append(sourceField.getY())
                                     .append("x").append(destinationField.getX()).append("y").append(destinationField.getY());
-                            System.out.println("Message: "+s.toString());
+                            System.out.println("Message: " + s.toString());
                             //We set piece to move as null , destination field as null and change the player who will now make a move and changing he's token
-                            NetworkPlayer.send(s.toString());
+                            NetworkPlayer.sendString("new position");
+                            NetworkPlayer.sendString(s.toString());
                             sourceField = null;
                             destinationField = null;
                             toMovePiece = null;
                             if (MovingPlayer.isItFirstMove()) {
                                 MovingPlayer.setItsSecond();
-                              //  NetworkPlayer.send("false");
+                                //  NetworkPlayer.send("false");
                             }
                             MovingPlayer.changeToken(false);
                             MovingPlayer = MovingPlayer.getOpponent();
@@ -201,18 +206,15 @@ public class BoardPanel extends JPanel implements MouseListener {
                     if (sourceField != null && destinationField != null) {
                         destinationField = null;
                     }
-
-                    //ReceiveMessage();
                 }
             }
-
-
         }
     }
-    private void ReceiveMessage()
+
+    public synchronized void receiveMessage(String frame)
     {
 
-        char[] message=NetworkPlayer.receiveString().toCharArray();
+        char[] message=frame.toCharArray();
         System.out.println("Received message: "+message[0]+" "+message[1]+" "+message[2]+" "+message[3]);
         if(message.length==8) {
             sourceField = game_board.chessBoard.getField(Character.getNumericValue(message[1]), Character.getNumericValue(message[3]));
@@ -235,6 +237,7 @@ public class BoardPanel extends JPanel implements MouseListener {
         {
             game_board.getWhitePlayer().setItsSecond();
         }
+        MovingPlayer = MovingPlayer.getOpponent();
     }
 
     @Override
@@ -271,4 +274,10 @@ public class BoardPanel extends JPanel implements MouseListener {
         this.destinationField=null;
         this.toMovePiece=null;
     }
+
+    public boolean checkInstance(){
+        return (MovingPlayer instanceof WhitePlayer && LocalPlayer instanceof BlackPlayer) ||
+                (MovingPlayer instanceof BlackPlayer && LocalPlayer instanceof WhitePlayer);
+    }
+
 }

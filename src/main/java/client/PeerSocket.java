@@ -12,4 +12,7 @@ public abstract class PeerSocket {
     public abstract void closeSocket();
     public abstract void sendString(String message);
     public abstract String receiveString();
+    public BufferedReader getInputStream(){
+        return in;
+    }
 }

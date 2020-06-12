@@ -6,6 +6,7 @@ import org.apache.log4j.Logger;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Serializable;
 
@@ -376,5 +377,13 @@ public class Client implements ActionListener {
 
     public boolean getIsServer(){
         return isServer;
+    }
+
+    public CliSocket getClientCLientSocket(){
+        return clientClientSocket;
+    }
+
+    public ClientServerSocket getClientServerSocket(){
+        return clientServerSocket;
     }
 }

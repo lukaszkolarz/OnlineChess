@@ -20,6 +20,7 @@ public class Player implements ActionListener {
     private JFrame colorWindow;
     private BoardGUI gameinstance;
     private Engine.Player LocalPlayer;
+    private ListeningGamer gamer;
     //private Engine.Player NetworkPlayer;
     public Player(Client gameSocket){
         this.gameSocket = gameSocket;
@@ -57,8 +58,10 @@ public class Player implements ActionListener {
             {
                 System.out.println("Can't set player as "+color+" player");
             }
-            this.gameinstance.setSocket(gameSocket);
+            this.gameinstance.setSocket(gameSocket.getClientCLientSocket());
             this.gameinstance.getBoardPanel().setLocalPlayer(LocalPlayer);
+            gamer = new ListeningGamer(gameinstance.getBoardPanel(), gameSocket.getClientCLientSocket().getInputStream());
+            gamer.start();
         }
 
     }
@@ -99,7 +102,7 @@ public class Player implements ActionListener {
             colorWindow.setVisible(false);
             this.gameinstance=BoardGUI.getInstance();
             this.LocalPlayer=gameinstance.getBoardPanel().getGame().getWhitePlayer();
-            this.gameinstance.setSocket(gameSocket);
+            this.gameinstance.setSocket(gameSocket.getClientServerSocket());
             this.gameinstance.setFrameName("Player "+color);
 
         } else if (e.getSource() == black){
@@ -110,9 +113,11 @@ public class Player implements ActionListener {
             colorWindow.setVisible(false);
             this.gameinstance=BoardGUI.getInstance();
             this.LocalPlayer=gameinstance.getBoardPanel().getGame().getBlackPlayer();
-            this.gameinstance.setSocket(gameSocket);
+            this.gameinstance.setSocket(gameSocket.getClientServerSocket());
             this.gameinstance.setFrameName("Player "+color);
         }
         this.gameinstance.getBoardPanel().setLocalPlayer(LocalPlayer);
+        gamer = new ListeningGamer(gameinstance.getBoardPanel(), gameSocket.getClientServerSocket().getInputStream());
+        gamer.start();
     }
 }

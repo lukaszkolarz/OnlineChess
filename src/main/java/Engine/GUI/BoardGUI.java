@@ -1,6 +1,9 @@
 package Engine.GUI;
 
+import client.CliSocket;
 import client.Client;
+import client.ClientServerSocket;
+import client.PeerSocket;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,7 +15,7 @@ import java.awt.event.ActionListener;
 public class BoardGUI extends JFrame {
     private Dimension WINDOW_size=new Dimension(615,660);
     private Dimension FIELD_size=new Dimension(50,50);
-    private BoardPanel chess_board;
+    private final BoardPanel chess_board;
     private static BoardGUI instance;
     private BoardGUI()
     {
@@ -35,7 +38,11 @@ public class BoardGUI extends JFrame {
         }
         return instance;
     }
-    public void setSocket(Client GameSocket)
+    public void setSocket(CliSocket GameSocket)
+    {
+        chess_board.setSock(GameSocket);
+    }
+    public void setSocket(ClientServerSocket GameSocket)
     {
         chess_board.setSock(GameSocket);
     }
