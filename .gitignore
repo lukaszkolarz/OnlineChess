@@ -35,3 +35,4 @@ src/main/resources/.DS_Store
 src/test/
 target/generated-sources/
 target/classes/
+.idea/misc.xml

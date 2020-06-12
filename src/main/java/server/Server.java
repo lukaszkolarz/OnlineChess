@@ -140,14 +140,9 @@ public class Server extends Thread implements ActionListener {
         info.add(serverPort);
 
         endButton = new JButton("EXIT");
-        endButton.setBounds(20, 75, 95, 30);
+        endButton.setBounds(78, 75, 95, 30);
         info.add(endButton);
         endButton.addActionListener(this);
-
-        startButton = new JButton("Start Server");
-        startButton.setBounds(135, 75, 95, 30);
-        info.add(startButton);
-        startButton.addActionListener(this);
 
         info.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         info.setLocationRelativeTo(null);
@@ -162,9 +157,6 @@ public class Server extends Thread implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == button) {
             startButtonAction();
-
-        }else if (e.getSource() == startButton){
-            //startServerButtonAction();
 
         } else if (e.getSource() == endButton){
             endButtonAction();
@@ -195,18 +187,6 @@ public class Server extends Thread implements ActionListener {
             }
         }
         this.start();
-    }
-
-    public void startServerButtonAction() {
-        if (!serverStarted) {
-            this.start();
-            JOptionPane.showMessageDialog(null, "Server started",
-                    "Information", JOptionPane.INFORMATION_MESSAGE);
-            logger.info("Server started");
-        } else {
-            JOptionPane.showMessageDialog(null, "Server is running",
-                    "Warning", JOptionPane.WARNING_MESSAGE);
-        }
     }
 
     public void endButtonAction(){
