@@ -19,9 +19,8 @@ public class Server extends Thread implements ActionListener {
     private ServerSocket server;
     private int port;
     private JFrame window;
-    private JButton button, endButton, startButton;
+    private JButton button, endButton;
     private JTextField portField;
-    private boolean serverStarted = false;
     private InetAddress local;
 
     /**
@@ -79,7 +78,6 @@ public class Server extends Thread implements ActionListener {
      */
     @Override
     public void run(){
-        serverStarted = true;
         while(true) {
             SrvThread w;
             try{
