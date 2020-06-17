@@ -4,8 +4,8 @@ import java.lang.*;
 
 
 public final class Field {
-    private final int x;
-    private final int y;
+    private final Integer x;
+    private final Integer y;
     private boolean occupied;
     private Piece piece;
     public Field(int row,int col)
@@ -38,11 +38,11 @@ public final class Field {
         this.piece=p;
         this.occupied=true;
     }
-    public int getX()
+    public Integer getX()
     {
         return x;
     }
-    public int getY()
+    public Integer getY()
     {
         return y;
     }

@@ -7,7 +7,7 @@ import static Engine.Alliance.WHITE;
 
 import java.util.*;
 
-public class Board {
+public class Board{
     private Field[][] board;
     private List<Piece> WhitePieces;
     private List<Piece> BlackPieces;
@@ -43,19 +43,10 @@ public class Board {
     }
     public List<Piece> getWhitePieces()
     {
-        for(Piece white: WhitePieces)
-        {
-            System.out.println("X:"+white.getPieceX()+" Y:"+white.getPieceY()+" type:"+white.toStringPieceType()+" "+white.getPieceAlliance());
-        }
         return this.WhitePieces;
     }
     public List<Piece> getBlackPieces()
     {
-        //System.out.println("Something is wrong");
-        for(Piece black: BlackPieces)
-        {
-            System.out.println("X:"+black.getPieceX()+" Y:"+black.getPieceY()+" type:"+black.toStringPieceType()+" "+black.getPieceAlliance());
-        }
         return this.BlackPieces;
     }
     public void setClearField(int x,int y)

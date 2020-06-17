@@ -52,6 +52,33 @@ public class Queen extends Piece{
         }
         return PossibleMoves;
     }
+
+    @Override
+    public List<Move> LegalMovesStandard(Board game_board) {
+        List<Move> PossibleMoves=new ArrayList<Move>();
+        for(int row=0;row<8;row++)
+        {
+            int PositionX=moves[row][0];
+            int PositionY=moves[row][1];
+            while(MoveIsLegal(PositionX,PositionY))
+            {
+                final Field candidate=game_board.getField(this.piecePosition_x+PositionX,this.piecePosition_y+PositionY);
+                if(!candidate.isFieldOccupied())
+                {
+                    PossibleMoves.add(new Move(game_board,this,candidate));
+                }
+                if(candidate.isFieldOccupied())
+                {
+                    PossibleMoves.add(new Move(game_board,this,candidate));
+                    break;
+                }
+                PositionX+=moves[row][0];
+                PositionY+=moves[row][1];
+            }
+        }
+        return PossibleMoves;
+    }
+
     @Override
     public String toStringPieceType()
     {

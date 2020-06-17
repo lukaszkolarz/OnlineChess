@@ -38,7 +38,11 @@ public class ListeningGamer extends Thread{
                 if (input.equals("new position")) {
                     String position = receiveString();
                     panel.receiveMessage(position);
-                } else {
+                }
+                else if(input.equals("Win")) {
+                    panel.endOfGame("Win");
+                }
+                else {
                     setMessage(input);
                 }
             } catch (NullPointerException e){

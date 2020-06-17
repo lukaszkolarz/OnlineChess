@@ -45,6 +45,21 @@ public class Knight extends Piece {
         }
         return PossibleMoves;
     }
+
+    @Override
+    public List<Move> LegalMovesStandard(Board game_board) {
+        List<Move> PossibleMoves=new ArrayList<>();
+        for(int row=0;row<8;row++)
+        {
+            if(MoveIsLegal(moves[row][0],moves[row][1]))
+            {
+                final Field candidate=game_board.getField(this.piecePosition_x+moves[row][0],this.piecePosition_y+moves[row][1]);
+                PossibleMoves.add(new Move(game_board,this,candidate));
+            }
+        }
+        return PossibleMoves;
+    }
+
     @Override
     public String toStringPieceType()
     {

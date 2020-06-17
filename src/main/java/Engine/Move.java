@@ -59,7 +59,7 @@ public class Move {
                 {
                     if(toKill.isEqual(whitePieces.get(i)))
                     {
-                        System.out.println("Piece deleted: "+toKill.toStringPieceType()+" "+toKill.getPieceAlliance()+" x:"+toKill.getPieceX()+" y:"+toKill.getPieceY());
+                        System.out.println("Piece deleted: "+toKill.toStringPieceType()+" "+toKill.getPieceAlliance()+" x:"+toKill.getPieceX()+" y:"+toKill.getPieceY()+" by:x"+movePiece.getPieceX()+" y"+movePiece.getPieceY()+" al:"+movePiece.getAlliance()+" "+movePiece.toStringPieceType());
                         game_board.getWhitePieces().remove(i);
                         break;
                     }
@@ -72,7 +72,7 @@ public class Move {
                 {
                     if(toKill.isEqual(blackPieces.get(i)))
                     {
-                        System.out.println("Piece deleted: "+toKill.toStringPieceType()+" "+toKill.getPieceAlliance()+" x:"+toKill.getPieceX()+" y:"+toKill.getPieceY());
+                        System.out.println("Piece deleted: "+toKill.toStringPieceType()+" "+toKill.getPieceAlliance()+" x:"+toKill.getPieceX()+" y:"+toKill.getPieceY()+" by:x"+movePiece.getPieceX()+" y"+movePiece.getPieceY()+" al:"+movePiece.getAlliance()+" "+movePiece.toStringPieceType());
                         game_board.getBlackPieces().remove(i);
                         break;
                     }

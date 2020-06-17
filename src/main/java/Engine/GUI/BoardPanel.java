@@ -9,6 +9,8 @@ import client.PeerSocket;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
@@ -24,6 +26,8 @@ public class BoardPanel extends JPanel implements MouseListener {
     private Field destinationField;
     private Piece toMovePiece;
     private List<Move> moves;
+    private List<Move> outOfCheckMoves;
+    private JFrame endFrame;
 
     public BoardPanel()
     {
@@ -78,8 +82,22 @@ public class BoardPanel extends JPanel implements MouseListener {
         if (checkInstance()) {
             return;
         } else {
-            int coordinateX = mouseEvent.getY() / 75;
-            int coordinateY = mouseEvent.getX() / 75;
+            int coordinateX;
+            int coordinateY;
+            if(MovingPlayer.isInCheck())
+            {
+                FieldPanel inCheck=((FieldPanel)this.getComponent(8*MovingPlayer.getKing().getPieceX()+MovingPlayer.getKing().getPieceY()));
+                inCheck.changeFieldColorToAttack();
+                outOfCheckMoves=MovingPlayer.haveEscapeMoves(game_board.chessBoard);
+                if(outOfCheckMoves.isEmpty())
+                {
+                    NetworkPlayer.sendString("Win");
+                    endOfGame("Lose");
+                }
+
+            }
+            coordinateX = mouseEvent.getY() / 75;
+            coordinateY = mouseEvent.getX() / 75;
             System.out.println(coordinateX + " " + coordinateY);
             if (sourceField == null) {
                 //Check if it's first move
@@ -93,8 +111,7 @@ public class BoardPanel extends JPanel implements MouseListener {
                     toMovePiece = sourceField.getPiece();
                     //if you clicked on other alliance piece or field without piece then start again
                     if (toMovePiece == null || toMovePiece.getAlliance() != Alliance.WHITE) {
-                        sourceField = null;
-                        toMovePiece = null;
+                        ResetSourceAndPiece();
                     }
                     //else print out and highlight legal moves if field is occupied highlight in color red otherwise highlight in color green
                     else {
@@ -112,20 +129,18 @@ public class BoardPanel extends JPanel implements MouseListener {
                 }
                 //If it's not the first move
                 else {
-                    //get piece from clicked field
-                    sourceField = game_board.chessBoard.getField(coordinateX, coordinateY);
-                    toMovePiece = sourceField.getPiece();
-
+                    sourceField=game_board.chessBoard.getField(coordinateX,coordinateY);
+                    toMovePiece=sourceField.getPiece();
 
                     //if clicked piece is not the  same alliance as player or you didn't clicked on piece reset sourceField and piece to move
                     if (toMovePiece == null || toMovePiece.getAlliance() != MovingPlayer.getPlayerAlliance()) {
-                        sourceField = null;
-                        toMovePiece = null;
+                        ResetSourceAndPiece();
                     }
                     //Else highlight moves as earlier in else have to put statemant with is player in check or checkmate
                     else {
                         FieldPanel ToMoveElement = ((FieldPanel) this.getComponent(8 * (coordinateX) + coordinateY));
                         ToMoveElement.changeFieldColorToNeutral();
+
                         this.moves = toMovePiece.LegalMoves(game_board.chessBoard);
                         for (Move simple : moves) {
                             System.out.println("Move x:" + simple.getNextX() + " y:" + simple.getNextY() + " piece position:" + simple.getPiece().toStringPieceType() + " x:" + simple.getPiece().getPieceX() + " y:" + simple.getPiece().getPieceY());
@@ -153,58 +168,90 @@ public class BoardPanel extends JPanel implements MouseListener {
                         }
 
                     });
-                    sourceField = null;
-                    destinationField = null;
-                    toMovePiece = null;
-
+                    ResetWholeMove();
                 } else {
                     //If we clicked on other field
+
                     destinationField = game_board.chessBoard.getField(coordinateX, coordinateY);
                     Move destinationMove = new Move(game_board.chessBoard, toMovePiece, destinationField);
-                    // List<Move> moves = toMovePiece.LegalMoves(game_board.chessBoard);
                     System.out.println("Move we choose x:" + destinationMove.getNextX() + " y:" + destinationMove.getNextY());
-                    for (Move sample : this.moves) {
-                        System.out.println("Move x:" + sample.getNextX() + " y:" + sample.getNextY() + " piece position:" + sample.getPiece().toStringPieceType() + " x:" + sample.getPiece().getPieceX() + " y:" + sample.getPiece().getPieceY());
-                        System.out.println("Move is: " + sample.equals(destinationMove));
-                    }
-                    //Here we check if move is one of the valid ones and then if it is redraw board and update pawns
-                    for (Move destination : this.moves) {
-                        if (destination.equals(destinationMove)) {
-                            destinationMove.updateBoard();
-                            game_board.getWhitePlayer().updatePieces();
-                            game_board.getBlackPlayer().updatePieces();
-                            SwingUtilities.invokeLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    System.out.println("Redrawing board ");
-                                    redrawBoard(game_board.chessBoard);
+                    if(MovingPlayer.isInCheck())
+                    {
+                        for(Move move:outOfCheckMoves)
+                        {
+                            if(move.equals(destinationMove))
+                            {
+                                destinationMove.updateBoard();
+                                game_board.getWhitePlayer().updatePieces();
+                                game_board.getBlackPlayer().updatePieces();
+                                SwingUtilities.invokeLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        System.out.println("Redrawing board ");
+                                        redrawBoard(game_board.chessBoard);
+                                    }
+
+                                });
+                                StringBuilder s = new StringBuilder();
+                                s.append("x").append(sourceField.getX()).append("y").append(sourceField.getY())
+                                        .append("x").append(destinationField.getX()).append("y").append(destinationField.getY());
+                                System.out.println("Message: " + s.toString());
+                                //We set piece to move as null , destination field as null and change the player who will now make a move and changing he's token
+                                NetworkPlayer.sendString("new position");
+                                NetworkPlayer.sendString(s.toString());
+                                ResetWholeMove();
+                                if (MovingPlayer.isItFirstMove()) {
+                                    MovingPlayer.setItsSecond();
                                 }
-
-                            });
-                            StringBuilder s = new StringBuilder();
-                            s.append("x").append(sourceField.getX()).append("y").append(sourceField.getY())
-                                    .append("x").append(destinationField.getX()).append("y").append(destinationField.getY());
-                            System.out.println("Message: " + s.toString());
-                            //We set piece to move as null , destination field as null and change the player who will now make a move and changing he's token
-                            NetworkPlayer.sendString("new position");
-                            NetworkPlayer.sendString(s.toString());
-                            sourceField = null;
-                            destinationField = null;
-                            toMovePiece = null;
-                            if (MovingPlayer.isItFirstMove()) {
-                                MovingPlayer.setItsSecond();
-                                //  NetworkPlayer.send("false");
+                                MovingPlayer.changeToken(false);
+                                MovingPlayer = MovingPlayer.getOpponent();
+                                MovingPlayer.changeToken(true);
+                                break;
                             }
-                            MovingPlayer.changeToken(false);
-                            MovingPlayer = MovingPlayer.getOpponent();
-                            MovingPlayer.changeToken(true);
-
-                            break;
                         }
-
                     }
-                    if (sourceField != null && destinationField != null) {
-                        destinationField = null;
+                    else {
+                        for (Move sample : this.moves) {
+                            System.out.println("Move x:" + sample.getNextX() + " y:" + sample.getNextY() + " piece position:" + sample.getPiece().toStringPieceType() + " x:" + sample.getPiece().getPieceX() + " y:" + sample.getPiece().getPieceY());
+                            System.out.println("Move is: " + sample.equals(destinationMove));
+                        }
+                        //Here we check if move is one of the valid ones and then if it is redraw board and update pawns
+                        for (Move destination : this.moves) {
+
+                            if (destination.equals(destinationMove)) {
+                                destinationMove.updateBoard();
+                                game_board.getWhitePlayer().updatePieces();
+                                game_board.getBlackPlayer().updatePieces();
+                                SwingUtilities.invokeLater(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        System.out.println("Redrawing board ");
+                                        redrawBoard(game_board.chessBoard);
+                                    }
+
+                                });
+                                StringBuilder s = new StringBuilder();
+                                s.append("x").append(sourceField.getX()).append("y").append(sourceField.getY())
+                                        .append("x").append(destinationField.getX()).append("y").append(destinationField.getY());
+                                System.out.println("Message: " + s.toString());
+                                //We set piece to move as null , destination field as null and change the player who will now make a move and changing he's token
+                                NetworkPlayer.sendString("new position");
+                                NetworkPlayer.sendString(s.toString());
+                                ResetWholeMove();
+                                if (MovingPlayer.isItFirstMove()) {
+                                    MovingPlayer.setItsSecond();
+                                }
+                                MovingPlayer.changeToken(false);
+                                MovingPlayer = MovingPlayer.getOpponent();
+                                MovingPlayer.changeToken(true);
+
+                                break;
+                            }
+
+                        }
+                        if (sourceField != null && destinationField != null) {
+                            destinationField = null;
+                        }
                     }
                 }
             }
@@ -274,10 +321,43 @@ public class BoardPanel extends JPanel implements MouseListener {
         this.destinationField=null;
         this.toMovePiece=null;
     }
-
+    public void print(List<Move> moves)
+    {
+        for(Move move:moves)
+        {
+            System.out.println("Piece x:"+move.getPiece().getPieceX()+" y:"+move.getPiece().getPieceY()+" where x:"+move.getNextX()+" y"+move.getNextY());
+        }
+    }
     public boolean checkInstance(){
         return (MovingPlayer instanceof WhitePlayer && LocalPlayer instanceof BlackPlayer) ||
                 (MovingPlayer instanceof BlackPlayer && LocalPlayer instanceof WhitePlayer);
     }
+    public void endOfGame(String text)
+    {
+        endFrame=new JFrame("Result");
+        endFrame.setSize(250,120);
+        endFrame.setLayout(null);
+        endFrame.setResizable(false);
+        JLabel info=new JLabel("You "+text);
+        info.setBounds(75,0,150,30);
+        endFrame.add(info);
+
+        info.setFont(info.getFont().deriveFont(24f));
+        JButton ok=new JButton("Ok");
+        ok.setBounds(100,40,50,25);
+        endFrame.add(ok);
+        NetworkPlayer.closeSocket();
+        ok.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                System.exit(0);
+            }
+        });
+        endFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        endFrame.setVisible(true);
+
+    }
+
 
 }
