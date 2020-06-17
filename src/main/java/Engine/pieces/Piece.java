@@ -22,7 +22,7 @@ public abstract class Piece{
 
 
     public abstract List<Move> LegalMoves(Board game_board);
-
+    public abstract List<Move> LegalMovesStandard(Board game_board);
     public boolean MoveIsLegal(int piece_move_x, int piece_move_y)
     {
         return (piece_move_x+this.piecePosition_x>=0)&&(piece_move_x+this.piecePosition_x<=7)

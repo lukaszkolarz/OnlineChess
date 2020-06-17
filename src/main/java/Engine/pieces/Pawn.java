@@ -92,6 +92,41 @@ public class Pawn extends Piece{
         return PossibleMoves;
     }
 
+    @Override
+    public List<Move> LegalMovesStandard(Board game_board) {
+        Field candidate;
+        List<Move> PossibleMoves=new ArrayList<Move>();
+        if(this.pieceColor.isWhite())
+        {
+            if(MoveIsLegal(-1,-1))
+            {
+                candidate=game_board.getField(this.piecePosition_x-1,this.piecePosition_y-1);
+                PossibleMoves.add(new Move(game_board,this,candidate));
+            }
+            if(MoveIsLegal(-1,1))
+            {
+                candidate=game_board.getField(this.piecePosition_x-1,this.piecePosition_y+1);
+                PossibleMoves.add(new Move(game_board,this,candidate));
+            }
+        }
+        if(this.pieceColor.isBlack())
+        {
+            if(MoveIsLegal(-1,-1))
+            {
+                candidate=game_board.getField(this.piecePosition_x+1,this.piecePosition_y-1);
+                PossibleMoves.add(new Move(game_board,this,candidate));
+            }
+            if(MoveIsLegal(-1,1))
+            {
+                candidate=game_board.getField(this.piecePosition_x+1,this.piecePosition_y+1);
+                PossibleMoves.add(new Move(game_board,this,candidate));
+            }
+        }
+
+
+        return PossibleMoves;
+    }
+
     public void isItFirstMove()
     {
         if(this.pieceColor.isBlack() && this.piecePosition_x==1)
