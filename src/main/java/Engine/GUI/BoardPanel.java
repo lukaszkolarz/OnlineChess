@@ -6,6 +6,8 @@ import client.CliSocket;
 import client.Client;
 import client.ClientServerSocket;
 import client.PeerSocket;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BoardPanel extends JPanel implements MouseListener {
+    private final static Logger logger = LogManager.getLogger("game");
     private List<FieldPanel> boardFields;
     private Game game_board;
     private PeerSocket NetworkPlayer;
@@ -98,7 +101,7 @@ public class BoardPanel extends JPanel implements MouseListener {
             }
             coordinateX = mouseEvent.getY() / 75;
             coordinateY = mouseEvent.getX() / 75;
-            System.out.println(coordinateX + " " + coordinateY);
+            logger.debug(coordinateX + " " + coordinateY);
             if (sourceField == null) {
                 //Check if it's first move
                 if (game_board.getWhitePlayer().isItFirstMove() && LocalPlayer instanceof WhitePlayer) {
@@ -119,7 +122,7 @@ public class BoardPanel extends JPanel implements MouseListener {
                         ToMoveElement.changeFieldColorToNeutral();
                         this.moves = toMovePiece.LegalMoves(game_board.chessBoard);
                         for (Move simple : moves) {
-                            System.out.println("Move x:" + simple.getNextX() + " y:" + simple.getNextY() + " piece position:" + simple.getPiece().toStringPieceType() + " x:" + simple.getPiece().getPieceX() + " y:" + simple.getPiece().getPieceY());
+                            logger.debug("Move x:" + simple.getNextX() + " y:" + simple.getNextY() + " piece position:" + simple.getPiece().toStringPieceType() + " x:" + simple.getPiece().getPieceX() + " y:" + simple.getPiece().getPieceY());
                             if (game_board.chessBoard.getField(simple.getNextX(), simple.getNextY()).isFieldOccupied())
                                 ((FieldPanel) this.getComponent(8 * (simple.getNextX()) + simple.getNextY())).changeFieldColorToAttack();
                             else
@@ -143,7 +146,7 @@ public class BoardPanel extends JPanel implements MouseListener {
 
                         this.moves = toMovePiece.LegalMoves(game_board.chessBoard);
                         for (Move simple : moves) {
-                            System.out.println("Move x:" + simple.getNextX() + " y:" + simple.getNextY() + " piece position:" + simple.getPiece().toStringPieceType() + " x:" + simple.getPiece().getPieceX() + " y:" + simple.getPiece().getPieceY());
+                            logger.debug("Move x:" + simple.getNextX() + " y:" + simple.getNextY() + " piece position:" + simple.getPiece().toStringPieceType() + " x:" + simple.getPiece().getPieceX() + " y:" + simple.getPiece().getPieceY());
                             if (game_board.chessBoard.getField(simple.getNextX(), simple.getNextY()).isFieldOccupied())
                                 ((FieldPanel) this.getComponent(8 * (simple.getNextX()) + simple.getNextY())).changeFieldColorToAttack();
                             else
@@ -158,7 +161,7 @@ public class BoardPanel extends JPanel implements MouseListener {
             else {
                 coordinateX = mouseEvent.getY() / 75;
                 coordinateY = mouseEvent.getX() / 75;
-                System.out.println(coordinateX + " " + coordinateY);
+                logger.debug(coordinateX + " " + coordinateY);
                 //If we clicked on same field as in the first click just reset board
                 if (sourceField.getX() == coordinateX && sourceField.getY() == coordinateY) {
                     SwingUtilities.invokeLater(new Runnable() {
@@ -174,7 +177,7 @@ public class BoardPanel extends JPanel implements MouseListener {
 
                     destinationField = game_board.chessBoard.getField(coordinateX, coordinateY);
                     Move destinationMove = new Move(game_board.chessBoard, toMovePiece, destinationField);
-                    System.out.println("Move we choose x:" + destinationMove.getNextX() + " y:" + destinationMove.getNextY());
+                    logger.debug("Move we choose x:" + destinationMove.getNextX() + " y:" + destinationMove.getNextY());
                     if(MovingPlayer.isInCheck())
                     {
                         for(Move move:outOfCheckMoves)
@@ -187,7 +190,7 @@ public class BoardPanel extends JPanel implements MouseListener {
                                 SwingUtilities.invokeLater(new Runnable() {
                                     @Override
                                     public void run() {
-                                        System.out.println("Redrawing board ");
+                                        logger.debug("Redrawing board ");
                                         redrawBoard(game_board.chessBoard);
                                     }
 
@@ -195,7 +198,7 @@ public class BoardPanel extends JPanel implements MouseListener {
                                 StringBuilder s = new StringBuilder();
                                 s.append("x").append(sourceField.getX()).append("y").append(sourceField.getY())
                                         .append("x").append(destinationField.getX()).append("y").append(destinationField.getY());
-                                System.out.println("Message: " + s.toString());
+                                logger.debug("Message: " + s.toString());
                                 //We set piece to move as null , destination field as null and change the player who will now make a move and changing he's token
                                 NetworkPlayer.sendString("new position");
                                 NetworkPlayer.sendString(s.toString());
@@ -212,8 +215,8 @@ public class BoardPanel extends JPanel implements MouseListener {
                     }
                     else {
                         for (Move sample : this.moves) {
-                            System.out.println("Move x:" + sample.getNextX() + " y:" + sample.getNextY() + " piece position:" + sample.getPiece().toStringPieceType() + " x:" + sample.getPiece().getPieceX() + " y:" + sample.getPiece().getPieceY());
-                            System.out.println("Move is: " + sample.equals(destinationMove));
+                            logger.debug("Move x:" + sample.getNextX() + " y:" + sample.getNextY() + " piece position:" + sample.getPiece().toStringPieceType() + " x:" + sample.getPiece().getPieceX() + " y:" + sample.getPiece().getPieceY());
+                            logger.debug("Move is: " + sample.equals(destinationMove));
                         }
                         //Here we check if move is one of the valid ones and then if it is redraw board and update pawns
                         for (Move destination : this.moves) {
@@ -225,7 +228,7 @@ public class BoardPanel extends JPanel implements MouseListener {
                                 SwingUtilities.invokeLater(new Runnable() {
                                     @Override
                                     public void run() {
-                                        System.out.println("Redrawing board ");
+                                        logger.debug("Redrawing board ");
                                         redrawBoard(game_board.chessBoard);
                                     }
 
@@ -233,7 +236,7 @@ public class BoardPanel extends JPanel implements MouseListener {
                                 StringBuilder s = new StringBuilder();
                                 s.append("x").append(sourceField.getX()).append("y").append(sourceField.getY())
                                         .append("x").append(destinationField.getX()).append("y").append(destinationField.getY());
-                                System.out.println("Message: " + s.toString());
+                                logger.debug("Message: " + s.toString());
                                 //We set piece to move as null , destination field as null and change the player who will now make a move and changing he's token
                                 NetworkPlayer.sendString("new position");
                                 NetworkPlayer.sendString(s.toString());
@@ -262,7 +265,7 @@ public class BoardPanel extends JPanel implements MouseListener {
     {
 
         char[] message=frame.toCharArray();
-        System.out.println("Received message: "+message[0]+" "+message[1]+" "+message[2]+" "+message[3]);
+        logger.debug("Received message: "+message[0]+" "+message[1]+" "+message[2]+" "+message[3]);
         if(message.length==8) {
             sourceField = game_board.chessBoard.getField(Character.getNumericValue(message[1]), Character.getNumericValue(message[3]));
             destinationField = game_board.chessBoard.getField(Character.getNumericValue(message[5]), Character.getNumericValue(message[7]));
@@ -325,7 +328,7 @@ public class BoardPanel extends JPanel implements MouseListener {
     {
         for(Move move:moves)
         {
-            System.out.println("Piece x:"+move.getPiece().getPieceX()+" y:"+move.getPiece().getPieceY()+" where x:"+move.getNextX()+" y"+move.getNextY());
+            logger.debug("Piece x:"+move.getPiece().getPieceX()+" y:"+move.getPiece().getPieceY()+" where x:"+move.getNextX()+" y"+move.getNextY());
         }
     }
     public boolean checkInstance(){

@@ -1,6 +1,8 @@
 package Engine;
 
 import Engine.pieces.*;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -12,6 +14,7 @@ import static java.util.stream.Collectors.collectingAndThen;
 
 public class BlackPlayer extends Player{
 
+    private final static Logger logger = LogManager.getLogger("game");
 
     public BlackPlayer(Game game)
     {
@@ -41,7 +44,8 @@ public class BlackPlayer extends Player{
                        if(this.king.getPieceX()==singleMove.getNextX() && this.king.getPieceY()==singleMove.getNextY())
                        {
                            this.isCheck=true;
-                           System.out.println("White player make check on you "+piece.toStringPieceType()+" x:"+piece.getPieceX()+" y:"+piece.getPieceY());
+                           logger.debug("White player make check on you "+piece.toStringPieceType()+" x:" +
+                                   piece.getPieceX() + " y:"+piece.getPieceY());
                            return true;
                        }
                    }
@@ -49,7 +53,7 @@ public class BlackPlayer extends Player{
            }
            catch(Exception e)
            {
-               System.out.println("Can't get White Pieces");
+               logger.error("Can't get White Pieces");
            }
 
 
@@ -79,24 +83,24 @@ public class BlackPlayer extends Player{
         if(attackingMoves.size()==1)
         {
             Move attack=attackingMoves.get(0);
-            List<Move> attacks=canBeAttacked(game_board,game_board.getField(attack.getPiece().getPieceX(),attack.getPiece().getPieceY()));
+            List<Move> attacks=canBeAttacked(game_board,game_board.getField(attack.getPiece().getPieceX(), attack.getPiece().getPieceY()));
             List<Move> kingMoves=king.LegalMoves(game_board);
             List<Move> protectKingMoves=kingProtectMoves(game_board);
             if(attacks.size()!=0)
             {
-                System.out.println("Attack moves: ");
+                logger.debug("Attack moves: ");
                 print(attacks);
                 escapeMoves.addAll(attacks);
             }
             if(kingMoves.size()!=0)
             {
-                System.out.println("King moves: ");
+                logger.debug("King moves: ");
                 print(kingMoves);
                 escapeMoves.addAll(kingMoves);
             }
             if(protectKingMoves.size()!=0)
             {
-                System.out.println("King protect moves: ");
+                logger.debug("King protect moves: ");
                 print(protectKingMoves);
                 escapeMoves.addAll(protectKingMoves);
             }

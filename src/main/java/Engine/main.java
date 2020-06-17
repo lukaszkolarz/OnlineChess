@@ -11,7 +11,7 @@ public class main {
         int count=1;
         for(int i=arr_start.length-1;i>=0;i--)
         {
-            System.out.println(arr[i]+" "+arr2[i]);
+            //System.out.println(arr[i]+" "+arr2[i]);
             arr_start[i]=Integer.parseInt(arr[i].trim());
             arr_end[i]=Integer.parseInt(arr2[i].trim());
             sum+=(arr_end[i]-arr_start[i])*count;

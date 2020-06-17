@@ -2,6 +2,8 @@ package Engine;
 
 import Engine.pieces.King;
 import Engine.pieces.Piece;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -16,11 +18,14 @@ public abstract class Player {
     protected King king;
     protected boolean yourTurn;
     protected boolean isFirst;
+    private final static Logger logger = LogManager.getLogger("game");
+
     public Player(Alliance type)
     {
         this.playerType=type;
         this.isCheck=false;
     }
+
     public boolean isInCheck()
     {
         return isCheck;
@@ -140,7 +145,7 @@ public abstract class Player {
     {
         for(Move move:moves)
         {
-            System.out.println("Piece x:"+move.getPiece().getPieceX()+" y:"+move.getPiece().getPieceY()+" where x:"+move.getNextX()+" y"+move.getNextY());
+            logger.debug("Piece x:"+move.getPiece().getPieceX()+" y:"+move.getPiece().getPieceY()+" where x:"+move.getNextX()+" y"+move.getNextY());
         }
     }
 

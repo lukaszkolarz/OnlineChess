@@ -10,7 +10,7 @@ import java.io.IOException;
 
 public class ListeningGamer extends Thread{
 
-    private final static Logger logger = LogManager.getLogger("game");
+    private final static Logger logger = LogManager.getLogger("clientNetwork");
     private final BufferedReader in;
     private String message;
     private boolean haveMessage = false;

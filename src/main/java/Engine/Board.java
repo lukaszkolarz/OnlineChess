@@ -1,5 +1,7 @@
 package Engine;
 import Engine.pieces.*;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 
 import static Engine.Alliance.BLACK;
@@ -11,6 +13,7 @@ public class Board{
     private Field[][] board;
     private List<Piece> WhitePieces;
     private List<Piece> BlackPieces;
+    private final static Logger logger = LogManager.getLogger("game");
 
     public Board(Builder boardbuild)
     {
@@ -34,7 +37,7 @@ public class Board{
             {
                 if(board[i][j].getX()!=i || board[i][j].getY()!=j)
                 {
-                    System.out.println("Not correctly constructed board wrong x/y in x:"+i+" y:"+j);
+                    logger.error("Not correctly constructed board wrong x/y in x:"+i+" y:"+j);
                     return false;
                 }
             }
@@ -93,7 +96,7 @@ public class Board{
             }
             else
             {
-                System.out.println("Something went wrong in initialization of white piece type "+piece.toStringPieceType()+" x:"+piece.getPieceX()+" y:"+piece.getPieceY());
+                logger.fatal("Something went wrong in initialization of white piece type "+piece.toStringPieceType()+" x:"+piece.getPieceX()+" y:"+piece.getPieceY());
             }
             return this;
         }
@@ -108,7 +111,7 @@ public class Board{
             }
             else
             {
-                System.out.println("Something went wrong in initialization of black piece type "+piece.toStringPieceType()+" x:"+piece.getPieceX()+" y:"+piece.getPieceY());
+                logger.fatal("Something went wrong in initialization of black piece type "+piece.toStringPieceType()+" x:"+piece.getPieceX()+" y:"+piece.getPieceY());
             }
             return this;
         }

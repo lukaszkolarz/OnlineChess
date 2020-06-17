@@ -1,6 +1,8 @@
 package Engine;
 
 import Engine.pieces.Piece;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 
 import java.util.List;
@@ -11,6 +13,8 @@ public class Move {
     private Piece movePiece;
     private int NextLocation_x;
     private int NextLocation_y;
+    private final static Logger logger = LogManager.getLogger("game");
+
     public Move(Board board,Piece PieceToMove,int x_destination,int y_destination)
     {
         this.game_board=board;
@@ -59,7 +63,7 @@ public class Move {
                 {
                     if(toKill.isEqual(whitePieces.get(i)))
                     {
-                        System.out.println("Piece deleted: "+toKill.toStringPieceType()+" "+toKill.getPieceAlliance()+" x:"+toKill.getPieceX()+" y:"+toKill.getPieceY()+" by:x"+movePiece.getPieceX()+" y"+movePiece.getPieceY()+" al:"+movePiece.getAlliance()+" "+movePiece.toStringPieceType());
+                        logger.debug("Piece deleted: "+toKill.toStringPieceType()+" "+toKill.getPieceAlliance()+" x:"+toKill.getPieceX()+" y:"+toKill.getPieceY()+" by:x"+movePiece.getPieceX()+" y"+movePiece.getPieceY()+" al:"+movePiece.getAlliance()+" "+movePiece.toStringPieceType());
                         game_board.getWhitePieces().remove(i);
                         break;
                     }
@@ -72,7 +76,7 @@ public class Move {
                 {
                     if(toKill.isEqual(blackPieces.get(i)))
                     {
-                        System.out.println("Piece deleted: "+toKill.toStringPieceType()+" "+toKill.getPieceAlliance()+" x:"+toKill.getPieceX()+" y:"+toKill.getPieceY()+" by:x"+movePiece.getPieceX()+" y"+movePiece.getPieceY()+" al:"+movePiece.getAlliance()+" "+movePiece.toStringPieceType());
+                        logger.debug("Piece deleted: "+toKill.toStringPieceType()+" "+toKill.getPieceAlliance()+" x:"+toKill.getPieceX()+" y:"+toKill.getPieceY()+" by:x"+movePiece.getPieceX()+" y"+movePiece.getPieceY()+" al:"+movePiece.getAlliance()+" "+movePiece.toStringPieceType());
                         game_board.getBlackPieces().remove(i);
                         break;
                     }
@@ -83,7 +87,7 @@ public class Move {
             this.game_board.setPieceOnField(this.movePiece, this.NextLocation_x, this.NextLocation_y);
             this.game_board.setClearField(x, y);
 
-        System.out.println(movePiece.toStringPieceType()+" moves to field x:"+NextLocation_x+" y:"+NextLocation_y);
+        logger.debug(movePiece.toStringPieceType()+" moves to field x:"+NextLocation_x+" y:"+NextLocation_y);
     }
 
 

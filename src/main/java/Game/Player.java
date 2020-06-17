@@ -31,11 +31,9 @@ public class Player implements ActionListener {
     private void chooseColor(){
         if (gameSocket.getIsServer()){
             logger.debug("Peer is a server");
-            System.out.println("Peer is a server");
             chooseColorWindow();
         } else {
             logger.debug("Peer is a client");
-            System.out.println("Peer is a client");
             color = gameSocket.receiveString();
             logger.debug("Received color:" + color);
             JOptionPane.showMessageDialog(null, "Your color: " + color,
@@ -56,7 +54,7 @@ public class Player implements ActionListener {
             }
             catch(NullPointerException e)
             {
-                System.out.println("Can't set player as "+color+" player");
+                logger.error("Can't set player as "+color+" player");
             }
             this.gameinstance.setSocket(gameSocket.getClientCLientSocket());
             this.gameinstance.getBoardPanel().setLocalPlayer(LocalPlayer);

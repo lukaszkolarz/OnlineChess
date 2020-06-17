@@ -3,6 +3,8 @@ package Engine.GUI;
 import Engine.Board;
 import Engine.Field;
 import Engine.pieces.Piece;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -17,6 +19,7 @@ public class FieldPanel extends JPanel {
     private int FieldX;
     private int FieldY;
     private Dimension fieldSize = new Dimension(75, 75);
+    private final static Logger logger = LogManager.getLogger("game");
 
 
 
@@ -69,7 +72,7 @@ public class FieldPanel extends JPanel {
                 BufferedImage img= ImageIO.read(new File(path.toString()));
                 this.add(new JLabel(new ImageIcon(img)));
             } catch (IOException e) {
-                System.out.println("Piece image not found and neither loaded to field "+path.toString());
+                logger.error("Piece image not found and neither loaded to field "+path.toString());
             }
         }
     }
